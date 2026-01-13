@@ -1,7 +1,5 @@
-import { faUpload } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Alert, Button, LinearProgress, Modal, Typography } from '@mui/material';
-import { Box } from '@mui/system';
+import { Alert, Box, Button, LinearProgress, Modal, Typography, Stack, alpha } from '@mui/material';
+import React, { useRef, useState } from 'react';
 import {
   deleteObject,
   getDownloadURL,
@@ -9,142 +7,181 @@ import {
   ref,
   uploadBytesResumable
 } from 'firebase/storage';
-import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { startGetDocumentsSuccess } from '../../actions/userActions';
 import { postEditDocument } from '../../services/documentsService';
-import { modalStyle } from '../../variables/styles';
-import { SuccessAlert } from '../Common/index';
+import { SuccessAlert } from '../Common';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faUpload, faFilePdf } from '@fortawesome/free-solid-svg-icons';
 
 const storage = getStorage();
+
 const EditDocumentModal = ({ open, setOpen, documentType }) => {
+  const dispatch = useDispatch();
+  const { idUsuario } = useParams();
+
+  const inputRef = useRef(null);
+
+  const [file, setFile] = useState(null);
   const [progressPercent, setProgressPercent] = useState(0);
-  const [file, setFile] = useState();
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
-  const { idUsuario } = useParams();
-  const dispatch = useDispatch();
-  const handleInputClick = () => {
-    document.querySelector('#fileSelector').click();
-  };
+
   const handleClose = () => {
-    setFile();
+    setFile(null);
     setProgressPercent(0);
+    setErrorMsg('');
+    setLoading(false);
     setOpen(false);
   };
-  const handleSetDocument = (e) => {
-    setFile(e.target.files[0]);
-  };
+
   const validateSelectedFile = () => {
-    const MAX_FILE_SIZE = 5120; // 5MB
+    const MAX_FILE_SIZE = 5120; // KB (5MB)
 
     if (!file) {
-      setErrorMsg('Por favor elige un archivo');
+      setErrorMsg('Por favor selecciona un archivo');
       return;
     }
-    const fileSizeKiloBytes = file.size / 1024;
 
-    if (fileSizeKiloBytes > MAX_FILE_SIZE) {
-      setErrorMsg('El tamaño del archivo es mayor que el límite máximo (5MB)');
+    if (file.size / 1024 > MAX_FILE_SIZE) {
+      setErrorMsg('El archivo excede el límite de 5MB');
       return;
     }
+
     setErrorMsg('');
     handleSubmitDocument();
   };
+
   const handleSubmitDocument = () => {
     setLoading(true);
-    const documentRef = ref(storage, `${Date.now()}`);
-    const documentTask = uploadBytesResumable(documentRef, file);
-    documentTask.on(
+
+    const documentRef = ref(storage, `${Date.now()}_${file.name}`);
+    const uploadTask = uploadBytesResumable(documentRef, file);
+
+    uploadTask.on(
       'state_changed',
       (snapshot) => {
         const progress = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
         setProgressPercent(progress);
       },
-      (error) => {
-        alert(error);
-      },
       () => {
-        getDownloadURL(documentTask.snapshot.ref).then((downloadURL) => {
-          try {
-            const deleteDocumentRef = ref(storage, documentType.document);
-            deleteObject(deleteDocumentRef)
-              .then(async () => {
-                await postEditDocument(documentType.id, downloadURL);
-                dispatch(startGetDocumentsSuccess(idUsuario));
-                handleClose();
-                SuccessAlert('Documento editado', 'Se ha editado el documento con éxito');
-                setLoading(false);
-              })
-              .catch((error) => {
-                console.log(error);
-              });
-          } catch (error) {
-            console.log(error);
+        setErrorMsg('Error al subir el archivo');
+        setLoading(false);
+      },
+      async () => {
+        try {
+          const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+
+          if (documentType?.document) {
+            const oldRef = ref(storage, documentType.document);
+            await deleteObject(oldRef);
           }
-        });
+
+          await postEditDocument(documentType.id, downloadURL);
+          dispatch(startGetDocumentsSuccess(idUsuario));
+
+          SuccessAlert('Documento actualizado', 'El documento se actualizó correctamente');
+
+          handleClose();
+        } catch (error) {
+          console.error(error);
+          setErrorMsg('No se pudo actualizar el documento');
+          setLoading(false);
+        }
       }
     );
   };
+
   return (
-    <Modal
-      open={open}
-      onClose={handleClose}
-      aria-labelledby="modal-modal-title"
-      aria-describedby="modal-modal-description">
-      <Box sx={modalStyle}>
-        <Typography variant="h5" component="h2">
-          Actualizar Documento
-        </Typography>
-        {errorMsg && (
-          <Alert variant="filled" severity="error">
-            {errorMsg}
-          </Alert>
-        )}
-        {loading ? (
-          <Box display={'flex'} justifyContent="center" flexDirection={'column'}>
-            <Typography>Se está subiendo el documento, por favor espere un momento...</Typography>
-            <Typography variant="h2" textAlign={'center'}>
-              {progressPercent}%
-            </Typography>
-            <LinearProgress
-              style={{ marginBottom: '20px' }}
-              variant="determinate"
-              value={progressPercent}
-            />
-          </Box>
-        ) : (
-          <>
-            {' '}
-            <input
-              id="fileSelector"
-              type="file"
-              name="file"
-              style={{ display: 'none' }}
-              accept="application/pdf"
-              onChange={(e) => handleSetDocument(e)}
-            />
-            <div className="button__upload" onClick={handleInputClick}>
-              <div className="button__upload__border" style={{ border: '3px dashed #001E3C' }}>
-                <FontAwesomeIcon icon={faUpload} />
-                <Typography variant="h6">Subir Archivo</Typography>
-                <Typography variant="subtitle1">
-                  {file ? `${file?.name} | ${file.type}` : '(PDF)'}
+    <Modal open={open} onClose={handleClose}>
+      <Box
+        sx={{
+          width: { xs: '90%', sm: 480 },
+          bgcolor: 'background.paper',
+          borderRadius: 4,
+          p: 4,
+          mx: 'auto',
+          mt: '10vh',
+          boxShadow: '0 24px 80px rgba(0,0,0,0.25)'
+        }}>
+        <Stack spacing={3}>
+          <Typography variant="h5" fontWeight={700}>
+            ✏️ Actualizar documento
+          </Typography>
+
+          {errorMsg && <Alert severity="error">{errorMsg}</Alert>}
+
+          {/* UPLOAD ZONE */}
+          {!loading ? (
+            <>
+              <input
+                ref={inputRef}
+                type="file"
+                hidden
+                accept="application/pdf"
+                onChange={(e) => setFile(e.target.files[0])}
+              />
+
+              <Box
+                onClick={() => inputRef.current?.click()}
+                sx={{
+                  border: `2px dashed ${alpha('#001E3C', 0.4)}`,
+                  borderRadius: 3,
+                  p: 4,
+                  textAlign: 'center',
+                  cursor: 'pointer',
+                  transition: 'all .3s ease',
+                  '&:hover': {
+                    backgroundColor: alpha('#001E3C', 0.04)
+                  }
+                }}>
+                <FontAwesomeIcon icon={faUpload} size="2x" style={{ color: '#001E3C' }} />
+                <Typography mt={1} fontWeight={600}>
+                  Seleccionar nuevo archivo
                 </Typography>
-              </div>
-            </div>{' '}
-          </>
-        )}
-        <Button
-          fullWidth
-          variant="outlined"
-          disabled={!file || loading}
-          onClick={validateSelectedFile}>
-          Guardar
-        </Button>
+                <Typography variant="body2" color="text.secondary">
+                  {file ? (
+                    <>
+                      <FontAwesomeIcon icon={faFilePdf} /> {file.name}
+                    </>
+                  ) : (
+                    'Formato PDF · Máx 5MB'
+                  )}
+                </Typography>
+              </Box>
+            </>
+          ) : (
+            <Stack spacing={2}>
+              <Typography>Actualizando documento… por favor espera</Typography>
+              <Typography variant="h4" textAlign="center">
+                {progressPercent}%
+              </Typography>
+              <LinearProgress
+                variant="determinate"
+                value={progressPercent}
+                sx={{ height: 8, borderRadius: 4 }}
+              />
+            </Stack>
+          )}
+
+          {/* ACTIONS */}
+          <Stack direction="row" spacing={2}>
+            <Button fullWidth variant="outlined" onClick={handleClose} disabled={loading}>
+              Cancelar
+            </Button>
+            <Button
+              fullWidth
+              variant="contained"
+              onClick={validateSelectedFile}
+              disabled={!file || loading}>
+              Guardar cambios
+            </Button>
+          </Stack>
+        </Stack>
       </Box>
     </Modal>
   );
 };
+
 export default EditDocumentModal;
