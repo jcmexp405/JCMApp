@@ -4,16 +4,17 @@
   "private": true,
   "lint": "eslint .",
   "lint:fix": "eslint --fix",
+  "homepage": ".",
   "format": "prettier --write './**/*.{js,jsx,ts,tsx,css,md,json}' --config ./.prettierrc",
   "engines": {
     "node": "20.x",
     "npm": "10.x"
   },
   "dependencies": {
-    "@capacitor/android": "^4.7.3",
-    "@capacitor/cli": "^4.7.3",
-    "@capacitor/core": "^4.7.3",
-    "@capacitor/ios": "^4.7.3",
+    "@capacitor/android": "^4.8.2",
+    "@capacitor/cli": "^4.8.2",
+    "@capacitor/core": "^4.8.2",
+    "@capacitor/ios": "^4.8.2",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@fortawesome/fontawesome-svg-core": "^6.3.0",

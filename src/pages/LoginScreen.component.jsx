@@ -13,7 +13,6 @@ const auth = getAuth();
 const LoginScreen = () => {
   const dispatch = useDispatch();
   const { error, user: userRole } = useSelector((state) => state.auth);
-
   // 🔐 AUTH STATE CORRECTO
   const [user, setUser] = useState(null);
   const [authReady, setAuthReady] = useState(false);
@@ -30,16 +29,31 @@ const LoginScreen = () => {
   });
 
   useEffect(() => {
+    // Timeout de seguridad: si Firebase no responde en 2 segundos, continuamos
+    const timeout = setTimeout(() => {
+      console.log('⚠️ Firebase timeout - continuando sin auth');
+      setUser(null);
+      setAuthReady(true);
+    }, 2000);
+
     const unsub = auth.onAuthStateChanged((firebaseUser) => {
+      console.log('👤 Firebase user:', firebaseUser);
+      clearTimeout(timeout);
       setUser(firebaseUser);
       setAuthReady(true);
     });
 
-    return () => unsub();
+    return () => {
+      clearTimeout(timeout);
+      unsub();
+    };
   }, []);
 
   // ⏳ Esperar a Firebase
-  if (!authReady) return null;
+  if (!authReady) {
+    console.log('⏳ Waiting for auth to be ready...');
+    return null;
+  }
 
   // ✅ Ya autenticado → redirigir según rol
   if (user && userRole?.type) {
@@ -75,7 +89,6 @@ const LoginScreen = () => {
                 {error.message}
               </Alert>
             )}
-
             <LoginInputs formik={formik} />
             <LoginButton />
           </form>

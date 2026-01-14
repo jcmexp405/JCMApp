@@ -1,4 +1,12 @@
-import { getFirestore, collection, addDoc, getDocs, query, orderBy } from 'firebase/firestore/lite';
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  getDocs,
+  query,
+  orderBy,
+  where
+} from 'firebase/firestore/lite';
 import app from '../firebaseElements/firebase';
 
 const db = getFirestore(app);
@@ -19,4 +27,17 @@ export const getAlertsSuccess = async () => {
   const alertsSnapshot = await getDocs(alertsCol);
   const alertsList = alertsSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
   return alertsList;
+};
+export const getUserAlertsSuccess = async (userId) => {
+  const alertsCol = query(
+    collection(db, 'alerts'),
+    where('user', '==', userId),
+    orderBy('date', 'desc')
+  );
+  const alertsSnapshot = await getDocs(alertsCol);
+
+  return alertsSnapshot.docs.map((doc) => ({
+    id: doc.id,
+    ...doc.data()
+  }));
 };

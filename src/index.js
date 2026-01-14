@@ -3,6 +3,16 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 import './index.css';
 import reportWebVitals from './reportWebVitals';
+import { Capacitor } from '@capacitor/core';
+
+if (Capacitor.isNativePlatform()) {
+  window.gapi = {
+    load: () => {},
+    iframes: {
+      getContext: () => {}
+    }
+  };
+}
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(

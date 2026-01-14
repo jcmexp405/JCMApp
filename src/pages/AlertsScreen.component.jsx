@@ -10,7 +10,6 @@ import { ResponsiveAppBar } from '../components/Common';
 const auth = getAuth();
 
 const AlertsScreen = () => {
-  // 🔐 AUTH STATE CORRECTO
   const [user, setUser] = useState(null);
   const [authReady, setAuthReady] = useState(false);
 
@@ -25,10 +24,8 @@ const AlertsScreen = () => {
     return () => unsub();
   }, []);
 
-  // ⏳ Esperar a Firebase
   if (!authReady) return null;
 
-  // 🚫 No autorizado
   if (!user || userRole?.type !== 'admin') {
     return <Navigate to="/login" replace />;
   }

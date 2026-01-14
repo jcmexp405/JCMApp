@@ -5,8 +5,10 @@ export const postUserAlert = (alert) => {
     const { selectedUser } = getState().documents;
     try {
       await postNewAlert(selectedUser, alert);
+      return true;
     } catch (error) {
       console.log(error);
+      throw error;
     }
   };
 };

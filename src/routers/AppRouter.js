@@ -1,4 +1,4 @@
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { HashRouter, Route, Routes } from 'react-router-dom';
 import { ErrorPage } from '../components/Common';
 import { PDFView } from '../components/Documents';
 import {
@@ -14,7 +14,7 @@ import {
 
 const AppRouter = () => {
   return (
-    <BrowserRouter>
+    <HashRouter>
       <Routes>
         <Route path="/" element={<LoginScreen />} />
         <Route path="/login" element={<LoginScreen />} />
@@ -28,7 +28,8 @@ const AppRouter = () => {
         <Route path="/tareas" element={<TasksScreen />} />
         <Route path="*" element={<ErrorPage />} />
       </Routes>
-    </BrowserRouter>
+    </HashRouter>
   );
 };
+
 export default AppRouter;

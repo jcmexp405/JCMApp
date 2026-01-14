@@ -141,21 +141,14 @@ const UsersScreen = () => {
                 startIcon={<PersonAddIcon />}
                 onClick={onOpenModal}
                 sx={{
-                  marginTop: 2,
+                  mt: 1,
                   backgroundColor: 'white',
                   color: '#00356a',
-                  fontSize: '1.1rem',
-                  fontWeight: 700,
-                  padding: '16px 40px',
-                  borderRadius: '50px',
-                  textTransform: 'none',
-                  boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
-                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                  '&:hover': {
-                    backgroundColor: alpha('#ffffff', 0.95),
-                    transform: 'translateY(-4px) scale(1.02)',
-                    boxShadow: '0 12px 48px rgba(0,0,0,0.4)'
-                  }
+                  fontWeight: 600,
+                  px: 3,
+                  py: 1,
+                  borderRadius: '40px',
+                  textTransform: 'none'
                 }}>
                 Crear Nuevo Usuario
               </Button>
@@ -210,7 +203,7 @@ const UsersScreen = () => {
                     fontSize: { xs: '1.25rem', md: '1.5rem' },
                     letterSpacing: '0.01em'
                   }}>
-                  📋 Directorio de Usuarios
+                  Directorio de Usuarios
                 </Typography>
               </Box>
 

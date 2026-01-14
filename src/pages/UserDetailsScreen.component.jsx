@@ -1,6 +1,17 @@
 import { faBell } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Button, Typography, Container, Paper, Stack, Fade, Chip, alpha } from '@mui/material';
+import {
+  Button,
+  Typography,
+  Container,
+  Paper,
+  Stack,
+  Fade,
+  Chip,
+  alpha,
+  Tabs,
+  Tab
+} from '@mui/material';
 import { Box } from '@mui/material';
 import { getAuth } from 'firebase/auth';
 import { Fragment, useEffect, useState } from 'react';
@@ -10,7 +21,8 @@ import { startGetDocumentsSuccess } from '../actions/userActions';
 import NewAlertModal from '../components/Alerts/NewAlertModal.component';
 import { ResponsiveAppBar } from '../components/Common';
 import UserDetailsTable from '../components/Users/UserDetailsTable.component';
-import PersonIcon from '@mui/icons-material/Person';
+import UserAlertsTable from '../components/Alerts/UserAlertsTable.component';
+import { getUserAlertsSuccess } from '../services/alertsService';
 
 const auth = getAuth();
 
@@ -18,82 +30,82 @@ const UserDetailsScreen = () => {
   const dispatch = useDispatch();
   const { idUsuario } = useParams();
 
-  // 🔐 AUTH STATE (CORRECTO)
   const [user, setUser] = useState(null);
   const [authReady, setAuthReady] = useState(false);
+  const [openModal, setOpenModal] = useState(false);
+  const [tab, setTab] = useState(0);
 
   const { selectedUser } = useSelector((state) => state.documents);
   const { user: userRole } = useSelector((state) => state.auth);
+  const [alertsList, setAlertsList] = useState([]);
 
-  const [openModal, setOpenModal] = useState(false);
+  const handleGetAlerts = async (idUsuario) => {
+    const response = await getUserAlertsSuccess(idUsuario);
+    setAlertsList(response);
+  };
+  useEffect(() => {
+    if (idUsuario) {
+      handleGetAlerts(idUsuario);
+    }
+  }, [idUsuario]);
 
-  // 📦 DATA
   useEffect(() => {
     if (idUsuario) {
       dispatch(startGetDocumentsSuccess(idUsuario));
     }
   }, [dispatch, idUsuario]);
 
-  // 🔐 FIREBASE AUTH (SIN RACE CONDITIONS)
   useEffect(() => {
     const unsub = auth.onAuthStateChanged((firebaseUser) => {
       setUser(firebaseUser);
       setAuthReady(true);
     });
-
     return () => unsub();
   }, []);
 
-  // ⏳ ESPERA A FIREBASE
   if (!authReady) return null;
-
-  // 🚫 NO AUTORIZADO
   if (!user || userRole?.type !== 'admin') {
     return <Navigate to="/login" replace />;
   }
+  const SectionHeader = ({ title, subtitle }) => (
+    <Box sx={{ mb: 3 }}>
+      <Typography
+        variant="h6"
+        sx={{
+          fontWeight: 700,
+          color: 'text.primary'
+        }}>
+        {title}
+      </Typography>
+      <Typography
+        variant="body2"
+        sx={{
+          color: 'text.secondary',
+          mt: 0.5
+        }}>
+        {subtitle}
+      </Typography>
+    </Box>
+  );
 
   return (
     <Fragment>
       <ResponsiveAppBar />
 
-      {/* HERO */}
       <Box
         sx={{
           background: 'linear-gradient(135deg, #00356a 0%, #001e3c 50%, #000d19 100%)',
-          pt: { xs: 6, md: 10 },
-          pb: { xs: 8, md: 12 },
-          position: 'relative',
-          overflow: 'hidden'
+          pt: { xs: 3, md: 4 },
+          pb: { xs: 4, md: 5 }
         }}>
         <Container maxWidth="lg">
           <Fade in timeout={800}>
-            <Stack spacing={3} alignItems="center" textAlign="center">
-              <Box
-                sx={{
-                  width: 90,
-                  height: 90,
-                  background: alpha('#ffffff', 0.15),
-                  backdropFilter: 'blur(10px)',
-                  borderRadius: '28px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  border: `2px solid ${alpha('#ffffff', 0.2)}`
-                }}>
-                <PersonIcon sx={{ fontSize: 56, color: 'white' }} />
-              </Box>
-
-              <Typography
-                variant="h2"
-                sx={{
-                  color: 'white',
-                  fontWeight: 800,
-                  fontSize: { xs: '2.3rem', md: '3.3rem' }
-                }}>
+            <Stack spacing={2} alignItems="center" textAlign="center">
+              <Typography variant="h4" sx={{ color: 'white', fontWeight: 700 }}>
                 {selectedUser?.name}
               </Typography>
 
-              <Stack direction="row" spacing={2} justifyContent="center" flexWrap="wrap">
+              <Stack direction="row" spacing={2} flexWrap="wrap">
                 <Chip
                   label={selectedUser?.company}
                   sx={{
@@ -113,22 +125,17 @@ const UserDetailsScreen = () => {
 
               <Button
                 variant="contained"
+                size="small"
                 startIcon={<FontAwesomeIcon icon={faBell} />}
                 onClick={() => setOpenModal(true)}
                 sx={{
-                  mt: 2,
                   backgroundColor: 'white',
                   color: '#00356a',
-                  fontWeight: 700,
-                  px: 5,
-                  py: 1.8,
-                  borderRadius: '50px',
-                  textTransform: 'none',
-                  boxShadow: '0 8px 32px rgba(0,0,0,.3)',
-                  '&:hover': {
-                    backgroundColor: alpha('#ffffff', 0.95),
-                    transform: 'translateY(-3px)'
-                  }
+                  fontWeight: 600,
+                  px: 3,
+                  py: 1,
+                  borderRadius: '40px',
+                  textTransform: 'none'
                 }}>
                 Crear Alerta
               </Button>
@@ -137,44 +144,88 @@ const UserDetailsScreen = () => {
         </Container>
       </Box>
 
-      {/* CONTENT */}
       <Box
         sx={{
           backgroundColor: '#e5e8eb',
           mt: '-10px',
-          position: 'relative',
-          zIndex: 2,
           pb: 6
         }}>
-        <Container style={{ marginTop: '15px' }} maxWidth="lg">
+        <Container maxWidth="lg" sx={{ mt: 2 }}>
           <Fade in timeout={1000}>
             <Paper
               elevation={0}
               sx={{
                 borderRadius: '30px',
                 overflow: 'hidden',
-                boxShadow: '0 20px 60px rgba(0,0,0,0.08)',
-                background: 'linear-gradient(to bottom, #ffffff, #fafbfc)'
+                boxShadow: '0 20px 60px rgba(0,0,0,0.08)'
               }}>
               <Box
                 sx={{
                   background: 'linear-gradient(135deg, #00356a 0%, #001e3c 100%)',
-                  p: 3
+                  px: 3,
+                  pt: 2
                 }}>
-                <Typography sx={{ color: 'white', fontWeight: 700, fontSize: '1.4rem' }}>
-                  📋 Detalle del Usuario
-                </Typography>
+                <Tabs
+                  value={tab}
+                  onChange={(_, v) => setTab(v)}
+                  textColor="inherit"
+                  TabIndicatorProps={{
+                    style: {
+                      backgroundColor: 'white',
+                      height: 3,
+                      borderRadius: 3
+                    }
+                  }}
+                  sx={{
+                    '& .MuiTab-root': {
+                      color: alpha('#fff', 0.7),
+                      fontWeight: 600,
+                      textTransform: 'none'
+                    },
+                    '& .Mui-selected': {
+                      color: 'white'
+                    }
+                  }}>
+                  <Tab label="Documentos" />
+                  <Tab label="Alertas" />
+                </Tabs>
               </Box>
 
               <Box sx={{ p: { xs: 2, md: 4 } }}>
-                <UserDetailsTable />
+                {tab === 0 && (
+                  <>
+                    <SectionHeader
+                      title="Documentos del Usuario"
+                      subtitle="Aquí puedes ver y gestionar los documentos del usuario."
+                    />
+                    <UserDetailsTable />
+                  </>
+                )}
+                {tab === 1 && (
+                  <>
+                    <SectionHeader
+                      title="Alertas del Usuario"
+                      subtitle="Aquí puedes ver y gestionar las alertas del usuario."
+                    />
+                    <UserAlertsTable
+                      alertsList={alertsList}
+                      handleGetAlerts={handleGetAlerts}
+                      idUsuario={idUsuario}
+                    />
+                  </>
+                )}
               </Box>
             </Paper>
           </Fade>
         </Container>
       </Box>
 
-      <NewAlertModal open={openModal} setOpen={setOpenModal} />
+      <NewAlertModal
+        open={openModal}
+        setOpen={setOpenModal}
+        handleGetAlerts={handleGetAlerts}
+        idUsuario={idUsuario}
+      />
     </Fragment>
   );
 };

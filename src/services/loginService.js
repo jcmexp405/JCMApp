@@ -1,12 +1,7 @@
-import {
-  getAuth,
-  sendPasswordResetEmail,
-  signInWithEmailAndPassword,
-  signOut
-} from 'firebase/auth';
+import { sendPasswordResetEmail, signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import { getFirestore, doc, getDoc } from 'firebase/firestore/lite';
-import app from '../firebaseElements/firebase';
-const auth = getAuth();
+import app, { auth } from '../firebaseElements/firebase';
+
 const db = getFirestore(app);
 
 export const userLogin = async (email, password) => {

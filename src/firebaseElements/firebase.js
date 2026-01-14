@@ -1,4 +1,13 @@
 import { initializeApp } from 'firebase/app';
+import { Capacitor } from '@capacitor/core';
+import {
+  initializeAuth,
+  getAuth,
+  browserLocalPersistence,
+  browserPopupRedirectResolver,
+  browserSessionPersistence,
+  indexedDBLocalPersistence
+} from 'firebase/auth';
 
 var firebaseConfig = {
   apiKey: 'AIzaSyDeJQuGv48Ei9k9JHIASzN8y-EjFAc8I_o',
@@ -12,4 +21,19 @@ var firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
+// Initialize Auth con configuración específica para Capacitor
+let auth;
+
+if (Capacitor.isNativePlatform()) {
+  console.log('📱 Initializing Firebase Auth for native platform (iOS/Android)');
+  auth = initializeAuth(app, {
+    persistence: [indexedDBLocalPersistence, browserLocalPersistence, browserSessionPersistence],
+    popupRedirectResolver: browserPopupRedirectResolver
+  });
+} else {
+  console.log('🌐 Initializing Firebase Auth for web');
+  auth = getAuth(app);
+}
+
+export { auth };
 export default app;

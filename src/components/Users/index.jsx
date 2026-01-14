@@ -27,7 +27,7 @@ const usersTableHeaders = [
 const userDetailsTableHeaders = [
   {
     id: 'HEAD-0',
-    title: 'Categoría'
+    title: 'Documento'
   },
   {
     id: 'HEAD-1',
