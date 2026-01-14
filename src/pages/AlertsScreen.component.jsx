@@ -117,7 +117,7 @@ const AlertsScreen = () => {
                     fontWeight: 700,
                     fontSize: '1.4rem'
                   }}>
-                  📋 Listado de alertas
+                  Listado de alertas
                 </Typography>
               </Box>
 
