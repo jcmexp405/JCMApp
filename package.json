@@ -11,6 +11,7 @@
     "npm": "10.x"
   },
   "dependencies": {
+    "@capacitor-firebase/authentication": "^1.4.0",
     "@capacitor/android": "^4.8.2",
     "@capacitor/cli": "^4.8.2",
     "@capacitor/core": "^4.8.2",
@@ -22,6 +23,7 @@
     "@fortawesome/react-fontawesome": "^0.2.0",
     "@mui/icons-material": "^5.18.0",
     "@mui/material": "^5.18.0",
+    "@mui/x-data-grid": "^6.17.0",
     "@react-pdf-viewer/core": "^3.11.0",
     "@react-pdf-viewer/default-layout": "^3.11.0",
     "@react-pdf/renderer": "^3.1.6",

@@ -1,13 +1,7 @@
 import { initializeApp } from 'firebase/app';
 import { Capacitor } from '@capacitor/core';
-import {
-  initializeAuth,
-  getAuth,
-  browserLocalPersistence,
-  browserPopupRedirectResolver,
-  browserSessionPersistence,
-  indexedDBLocalPersistence
-} from 'firebase/auth';
+import { initializeAuth, getAuth, indexedDBLocalPersistence } from 'firebase/auth';
+import { FirebaseAuthentication } from '@capacitor-firebase/authentication';
 
 var firebaseConfig = {
   apiKey: 'AIzaSyDeJQuGv48Ei9k9JHIASzN8y-EjFAc8I_o',
@@ -26,14 +20,14 @@ let auth;
 
 if (Capacitor.isNativePlatform()) {
   console.log('📱 Initializing Firebase Auth for native platform (iOS/Android)');
+  // For native platforms, we'll use the Capacitor Firebase Authentication plugin
   auth = initializeAuth(app, {
-    persistence: [indexedDBLocalPersistence, browserLocalPersistence, browserSessionPersistence],
-    popupRedirectResolver: browserPopupRedirectResolver
+    persistence: indexedDBLocalPersistence
   });
 } else {
   console.log('🌐 Initializing Firebase Auth for web');
   auth = getAuth(app);
 }
 
-export { auth };
+export { auth, FirebaseAuthentication };
 export default app;

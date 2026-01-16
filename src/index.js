@@ -12,8 +12,13 @@ if (Capacitor.isNativePlatform()) {
       getContext: () => {}
     }
   };
+  window.addEventListener('DOMContentLoaded', () => {
+    document.documentElement.classList.add('native');
+    document.body.classList.add('native');
+    console.log('✅ native class added');
+  });
 }
-
+console.log('isNativePlatform:', Capacitor.isNativePlatform());
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>

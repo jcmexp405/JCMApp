@@ -1,17 +1,19 @@
-import { Grid, Typography } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import Logo from '../../assets/images/logo-white.png';
 
 const LoginHeader = ({ title, subtitle }) => {
   return (
-    <Grid item display="flex" flexDirection="column" alignItems="center" justifyContent="center">
-      <img alt="img-logo" src={Logo} style={{ width: '10%', marginBottom: '10px' }} />
-      <Typography style={{ fontWeight: '200' }} variant="h3" textAlign="center">
-        {title}
+    <Box textAlign="center" mb={4}>
+      {' '}
+      <img alt="img-logo" src={Logo} style={{ width: '12%', marginBottom: '20px' }} />
+      <Typography variant="h4" fontWeight={500} color="white" style={{ lineHeight: '1.8rem' }}>
+        {title || 'Hola, bienvenido de nuevo!'}
       </Typography>
-      <Typography variant="subtitle1" textAlign="center" sx={{ mb: 3 }}>
-        {subtitle}
+      <Typography variant="body2" sx={{ mt: 1, color: 'rgba(255,255,255,0.75)' }}>
+        {subtitle || 'Inicia sesión para continuar'}
       </Typography>
-    </Grid>
+    </Box>
   );
 };
+
 export default LoginHeader;

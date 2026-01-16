@@ -52,3 +52,7 @@ export const setCurrentPath = (path) => ({
   type: types.SET_CURRENT_PATH,
   payload: path
 });
+
+export const logout = () => ({
+  type: types.LOGOUT
+});

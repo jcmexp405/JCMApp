@@ -1,11 +1,23 @@
 .App {
   text-align: center;
 }
-html, body, #root {
+/* Base */
+html,
+body,
+#root {
   height: 100%;
-  width: 100%;
   margin: 0;
   padding: 0;
+  background-color: #ffffff;
+}
+
+/* SOLO Capacitor */
+html.native,
+body.native,
+body.native #root {
+  overflow: hidden;          /* ⛔️ no scroll global */
+  overscroll-behavior: none; /* ⛔️ no bounce iOS */
+  -webkit-overflow-scrolling: auto;
 }
 
 

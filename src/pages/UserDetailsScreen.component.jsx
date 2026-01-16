@@ -13,7 +13,6 @@ import {
   Tab
 } from '@mui/material';
 import { Box } from '@mui/material';
-import { getAuth } from 'firebase/auth';
 import { Fragment, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Navigate, useParams } from 'react-router-dom';
@@ -23,15 +22,13 @@ import { ResponsiveAppBar } from '../components/Common';
 import UserDetailsTable from '../components/Users/UserDetailsTable.component';
 import UserAlertsTable from '../components/Alerts/UserAlertsTable.component';
 import { getUserAlertsSuccess } from '../services/alertsService';
-
-const auth = getAuth();
+import { useAuthState } from '../hooks/useAuthState';
 
 const UserDetailsScreen = () => {
   const dispatch = useDispatch();
   const { idUsuario } = useParams();
 
-  const [user, setUser] = useState(null);
-  const [authReady, setAuthReady] = useState(false);
+  const { user, authReady } = useAuthState();
   const [openModal, setOpenModal] = useState(false);
   const [tab, setTab] = useState(0);
 
@@ -54,14 +51,6 @@ const UserDetailsScreen = () => {
       dispatch(startGetDocumentsSuccess(idUsuario));
     }
   }, [dispatch, idUsuario]);
-
-  useEffect(() => {
-    const unsub = auth.onAuthStateChanged((firebaseUser) => {
-      setUser(firebaseUser);
-      setAuthReady(true);
-    });
-    return () => unsub();
-  }, []);
 
   if (!authReady) return null;
   if (!user || userRole?.type !== 'admin') {

@@ -1,19 +1,25 @@
-import { Button, Grid } from '@mui/material';
-import React from 'react';
+import { Button } from '@mui/material';
 
 const ResetPasswordButton = () => {
   return (
-    <Grid
-      item
-      xs={12}
-      display="flex"
-      alignItems="center"
-      justifyContent="center"
-      sx={{ paddingLeft: 5, paddingRight: 5 }}>
-      <Button type="submit" color="secondary" variant="contained" fullWidth>
-        Recuperar contraseña
-      </Button>
-    </Grid>
+    <Button
+      type="submit"
+      fullWidth
+      size="large"
+      sx={{
+        height: 52,
+        borderRadius: '14px',
+        fontWeight: 700,
+        fontSize: '1rem',
+        textTransform: 'none',
+        background: 'linear-gradient(135deg, #2dd4bf, #22c55e)',
+        color: '#00356a',
+        '&:hover': {
+          transform: 'translateY(-2px)'
+        }
+      }}>
+      Recuperar contraseña
+    </Button>
   );
 };
 

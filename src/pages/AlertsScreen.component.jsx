@@ -1,28 +1,15 @@
 import { Box, Typography, Container, Paper, Stack, Fade, alpha } from '@mui/material';
 import NotificationsIcon from '@mui/icons-material/Notifications';
-import { getAuth } from 'firebase/auth';
-import { useEffect, useState, Fragment } from 'react';
+import { Fragment } from 'react';
 import { useSelector } from 'react-redux';
 import { Navigate } from 'react-router-dom';
 import { AlertsTable } from '../components/Alerts';
 import { ResponsiveAppBar } from '../components/Common';
-
-const auth = getAuth();
+import { useAuthState } from '../hooks/useAuthState';
 
 const AlertsScreen = () => {
-  const [user, setUser] = useState(null);
-  const [authReady, setAuthReady] = useState(false);
-
+  const { user, authReady } = useAuthState();
   const { user: userRole } = useSelector((state) => state.auth);
-
-  useEffect(() => {
-    const unsub = auth.onAuthStateChanged((firebaseUser) => {
-      setUser(firebaseUser);
-      setAuthReady(true);
-    });
-
-    return () => unsub();
-  }, []);
 
   if (!authReady) return null;
 
@@ -34,58 +21,58 @@ const AlertsScreen = () => {
     <Fragment>
       <ResponsiveAppBar />
 
-      {/* HERO */}
+      {/* Hero Section with Gradient */}
       <Box
         sx={{
           background: 'linear-gradient(135deg, #00356a 0%, #001e3c 50%, #000d19 100%)',
-          pt: { xs: 6, md: 10 },
-          pb: { xs: 8, md: 12 },
           position: 'relative',
-          overflow: 'hidden'
+          overflow: 'hidden',
+          pt: { xs: 4, md: 6 },
+          pb: { xs: 10, md: 12 }
         }}>
         <Container maxWidth="lg">
-          <Fade in timeout={800}>
-            <Stack spacing={3} alignItems="center" textAlign="center">
+          <Fade in timeout={600}>
+            <Stack spacing={2.5} alignItems="center" textAlign="center">
               <Box
                 sx={{
-                  width: 90,
-                  height: 90,
+                  width: 84,
+                  height: 84,
                   background: alpha('#ffffff', 0.15),
-                  backdropFilter: 'blur(10px)',
-                  borderRadius: '28px',
+                  backdropFilter: 'blur(12px)',
+                  borderRadius: '24px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  border: `2px solid ${alpha('#ffffff', 0.2)}`
+                  border: `1px solid ${alpha('#ffffff', 0.25)}`
                 }}>
                 <NotificationsIcon sx={{ fontSize: 56, color: 'white' }} />
               </Box>
 
-              <Typography
-                variant="h2"
-                sx={{
-                  color: 'white',
-                  fontWeight: 800,
-                  fontSize: { xs: '2.3rem', md: '3.3rem' }
-                }}>
-                Alertas
-              </Typography>
+              <Stack direction="row" spacing={1.5} alignItems="center">
+                <Typography
+                  variant="h4"
+                  sx={{
+                    color: 'white',
+                    fontWeight: 800,
+                    letterSpacing: '-0.02em'
+                  }}>
+                  Alertas
+                </Typography>
+              </Stack>
 
               <Typography
+                variant="body1"
                 sx={{
-                  color: alpha('#ffffff', 0.9),
-                  maxWidth: 700,
-                  fontSize: { xs: '1rem', md: '1.2rem' },
-                  lineHeight: 1.6
+                  color: alpha('#ffffff', 0.85),
+                  maxWidth: 560
                 }}>
                 En esta sección puedes consultar y administrar las alertas generadas para todos los
-                usuarios del sistema.
+                usuarios del sistema.{' '}
               </Typography>
             </Stack>
           </Fade>
         </Container>
       </Box>
-
       {/* CONTENT */}
       <Box
         sx={{
