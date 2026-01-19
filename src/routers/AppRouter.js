@@ -9,7 +9,8 @@ import {
   DocumentsListScreen,
   AlertsScreen,
   TasksScreen,
-  ResetPasswordScreen
+  ResetPasswordScreen,
+  HelpScreen
 } from '../pages';
 
 const AppRouter = () => {
@@ -19,6 +20,7 @@ const AppRouter = () => {
         <Route path="/" element={<LoginScreen />} />
         <Route path="/login" element={<LoginScreen />} />
         <Route path="/resetpassword" element={<ResetPasswordScreen />} />
+        <Route path="/ayuda" element={<HelpScreen />} />
         <Route path="/documentos" element={<DocumentsMenuScreen />} />
         <Route path="/documentos/:idCategory" element={<DocumentsListScreen />} />
         <Route path="/documentos/preview" element={<PDFView />} />
