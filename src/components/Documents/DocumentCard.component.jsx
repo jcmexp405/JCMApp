@@ -11,7 +11,7 @@ const DocumentCard = ({ cardCathegory }) => {
   };
 
   return (
-    <Grid item xs={12} sm={4} md={3} lg={2}>
+    <Grid item xs={12} sm={12} md={12} lg={12}>
       <Card
         onClick={handleRedirect}
         elevation={0}
