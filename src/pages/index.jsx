@@ -7,6 +7,7 @@ import AlertsScreen from './AlertsScreen.component';
 import TasksScreen from './TasksScreen.component';
 import ResetPasswordScreen from './ResetPasswordScreen.component';
 import HelpScreen from './HelpScreen.component';
+import PrivacyPolicyScreen from './PrivacyPolicyScreen.component';
 export {
   AlertsScreen,
   DocumentsMenuScreen,
@@ -16,5 +17,6 @@ export {
   UsersScreen,
   TasksScreen,
   ResetPasswordScreen,
-  HelpScreen
+  HelpScreen,
+  PrivacyPolicyScreen
 };

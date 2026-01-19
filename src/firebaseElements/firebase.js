@@ -4,12 +4,12 @@ import { initializeAuth, getAuth, indexedDBLocalPersistence } from 'firebase/aut
 import { FirebaseAuthentication } from '@capacitor-firebase/authentication';
 
 var firebaseConfig = {
-  apiKey: 'AIzaSyDeJQuGv48Ei9k9JHIASzN8y-EjFAc8I_o',
-  authDomain: 'jcmexpansion.firebaseapp.com',
-  projectId: 'jcmexpansion',
-  storageBucket: 'jcmexpansion.appspot.com',
-  messagingSenderId: '116949457374',
-  appId: '1:116949457374:web:96ef5869b81a7fd786e54f'
+  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
+  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.REACT_APP_FIREBASE_APP_ID
 };
 
 // Initialize Firebase
