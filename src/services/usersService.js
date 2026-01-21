@@ -6,7 +6,8 @@ import {
   query,
   where,
   setDoc,
-  doc
+  doc,
+  orderBy
 } from 'firebase/firestore/lite';
 import app from '../firebaseElements/firebase';
 
@@ -54,7 +55,7 @@ export const getUserDocument = async (userId, cathegoryId) => {
 };
 
 export const getUserDocuments = async (userId) => {
-  const documentsCol = query(collection(db, 'documentType'));
+  const documentsCol = query(collection(db, 'documentType'), orderBy('title', 'asc'));
   const documentsSnapshot = await getDocs(documentsCol);
   const documentsList = documentsSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
   const newDocumentList = await Promise.all(
