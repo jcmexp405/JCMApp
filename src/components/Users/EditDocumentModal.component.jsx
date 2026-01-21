@@ -37,7 +37,7 @@ const EditDocumentModal = ({ open, setOpen, documentType }) => {
   };
 
   const validateSelectedFile = () => {
-    const MAX_FILE_SIZE = 5120; // KB (5MB)
+    const MAX_FILE_SIZE = 20480; // KB (20MB)
 
     if (!file) {
       setErrorMsg('Por favor selecciona un archivo');
@@ -45,7 +45,7 @@ const EditDocumentModal = ({ open, setOpen, documentType }) => {
     }
 
     if (file.size / 1024 > MAX_FILE_SIZE) {
-      setErrorMsg('El archivo excede el límite de 5MB');
+      setErrorMsg('El archivo excede el límite de 20MB');
       return;
     }
 
@@ -146,7 +146,7 @@ const EditDocumentModal = ({ open, setOpen, documentType }) => {
                       <FontAwesomeIcon icon={faFilePdf} /> {file.name}
                     </>
                   ) : (
-                    'Formato PDF · Máx 5MB'
+                    'Formato PDF · Máx 20MB'
                   )}
                 </Typography>
               </Box>
