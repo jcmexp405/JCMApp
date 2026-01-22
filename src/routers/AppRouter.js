@@ -13,6 +13,8 @@ import {
   HelpScreen,
   PrivacyPolicyScreen
 } from '../pages';
+import RequestAccountScreen from '../pages/RequestAccountScreen.component';
+import SuccessMessageScreen from '../pages/SuccessMessageScreen.component';
 
 const AppRouter = () => {
   return (
@@ -21,6 +23,8 @@ const AppRouter = () => {
         <Route path="/" element={<LoginScreen />} />
         <Route path="/login" element={<LoginScreen />} />
         <Route path="/resetpassword" element={<ResetPasswordScreen />} />
+        <Route path="/requestaccount" element={<RequestAccountScreen />} />
+        <Route path="/successmessage" element={<SuccessMessageScreen />} />
         <Route path="/ayuda" element={<HelpScreen />} />
         <Route path="/privacidad" element={<PrivacyPolicyScreen />} />
         <Route path="/documentos" element={<DocumentsMenuScreen />} />

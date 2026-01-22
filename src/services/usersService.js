@@ -7,7 +7,8 @@ import {
   where,
   setDoc,
   doc,
-  orderBy
+  orderBy,
+  addDoc
 } from 'firebase/firestore/lite';
 import app from '../firebaseElements/firebase';
 
@@ -68,4 +69,13 @@ export const getUserDocuments = async (userId) => {
     })
   );
   return newDocumentList;
+};
+
+export const postUserRequest = async (user) => {
+  return await addDoc(collection(db, 'requests'), {
+    name: user.USER,
+    email: user.EMAIL,
+    date: new Date(),
+    status: 'pending'
+  });
 };

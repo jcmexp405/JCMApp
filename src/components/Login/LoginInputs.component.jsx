@@ -47,20 +47,37 @@ const LoginInputs = ({ formik }) => {
         }}
       />
 
-      <Typography
-        component={Link}
-        to="/resetpassword"
-        sx={{
-          display: 'block',
-          mt: 1,
-          textAlign: 'right',
-          fontSize: '0.85rem',
-          color: '#7dd3fc',
-          textDecoration: 'none',
-          '&:hover': { textDecoration: 'underline' }
-        }}>
-        ¿Olvidaste tu contraseña?
-      </Typography>
+      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+        <Typography
+          component={Link}
+          to="/requestaccount"
+          sx={{
+            display: 'block',
+            mt: 1,
+            textAlign: 'right',
+            fontSize: '0.85rem',
+            color: '#7dd3fc',
+            textDecoration: 'none',
+            '&:hover': { textDecoration: 'underline' }
+          }}>
+          ¿Aún no tienes cuenta? Solicitar cuenta
+        </Typography>
+
+        <Typography
+          component={Link}
+          to="/resetpassword"
+          sx={{
+            display: 'block',
+            mt: 1,
+            textAlign: 'right',
+            fontSize: '0.85rem',
+            color: '#7dd3fc',
+            textDecoration: 'none',
+            '&:hover': { textDecoration: 'underline' }
+          }}>
+          ¿Olvidaste tu contraseña?
+        </Typography>
+      </div>
     </Box>
   );
 };

@@ -70,7 +70,7 @@ const LoginScreen = () => {
             align="center"
             sx={{ mt: 4, display: 'block', opacity: 0.6 }}>
             {' '}
-            © {new Date().getFullYear()} · Plataforma interna{' '}
+            © {new Date().getFullYear()} · JCM Expansión{' '}
           </Typography>
         </Paper>
       </Fade>

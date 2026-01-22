@@ -1,24 +1,36 @@
-import { Alert, Grid, Box, Typography, Fade, Paper, alpha, IconButton } from '@mui/material';
-import { useFormik } from 'formik';
-import { resetPasswordValidationSchema } from '../validations/resetPassword';
-import { userResetPassword } from '../actions/loginActions';
-import { useDispatch, useSelector } from 'react-redux';
-import { ResetPasswordInput, ResetPasswordButton } from '../components/Login';
+import { Grid, Paper, Box, Typography, IconButton, Fade, Alert } from '@mui/material';
+import { alpha } from '@mui/material/styles';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useFormik } from 'formik';
+import { requestAccountValidationSchema } from '../validations/accountRequest';
+import RequestAccountInput from '../components/Login/RequestAccountInput';
+import RequestAccountButton from '../components/Login/RequestAccountButton';
+import { postUserRequest } from '../services/usersService';
+import { useState } from 'react';
 
-const ResetPasswordScreen = () => {
-  const dispatch = useDispatch();
-  const { resetPass } = useSelector((state) => state.auth);
+const RequestAccountScreen = () => {
+  const navigate = useNavigate();
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const formik = useFormik({
-    initialValues: { USER: '' },
-    validationSchema: resetPasswordValidationSchema,
-    onSubmit: ({ USER }) => {
-      dispatch(userResetPassword(USER));
+    initialValues: { USER: '', EMAIL: '' },
+    validationSchema: requestAccountValidationSchema,
+    onSubmit: async ({ USER, EMAIL }) => {
+      setError(null);
+      setLoading(true);
+      try {
+        await postUserRequest({ USER, EMAIL });
+        navigate('/successmessage');
+      } catch (err) {
+        setError('Hubo un error al enviar tu solicitud. Por favor, intenta nuevamente.');
+        console.error('Error submitting request:', err);
+      } finally {
+        setLoading(false);
+      }
     }
   });
-
   return (
     <Grid
       container
@@ -60,27 +72,21 @@ const ResetPasswordScreen = () => {
           {/* 🔹 HEADER */}
           <Box mb={4}>
             <Typography variant="h4" fontWeight={700} color="white" gutterBottom>
-              Restablecer contraseña
+              Solicitar cuenta
             </Typography>
-
             <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.75)' }}>
-              Ingresa el email asociado a tu cuenta y te enviaremos un correo con las instrucciones
-              para recuperar tu contraseña.
+              Ingresa tu nombre y correo electrónico para solicitar una nueva cuenta. Nuestro equipo
+              se pondrá en contacto contigo lo antes posible.
             </Typography>
           </Box>
-
           <form onSubmit={formik.handleSubmit}>
-            {resetPass?.message && (
-              <Alert
-                variant="filled"
-                severity={resetPass.error ? 'error' : 'success'}
-                sx={{ mb: 3, borderRadius: '12px' }}>
-                {resetPass.message}
+            {error && (
+              <Alert severity="error" sx={{ mb: 2 }}>
+                {error}
               </Alert>
             )}
-
-            <ResetPasswordInput formik={formik} />
-            <ResetPasswordButton />
+            <RequestAccountInput formik={formik} />
+            <RequestAccountButton loading={loading} />
           </form>
 
           <Typography
@@ -95,4 +101,4 @@ const ResetPasswordScreen = () => {
   );
 };
 
-export default ResetPasswordScreen;
+export default RequestAccountScreen;
