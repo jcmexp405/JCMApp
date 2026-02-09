@@ -22,3 +22,8 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+!/node_modules/@capacitor/
+!/node_modules/@capacitor-community/
+!/node_modules/@capacitor-firebase/
+!/node_modules/capacitor-community-firebase-auth/
