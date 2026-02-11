@@ -1,5 +1,18 @@
-import { Alert, Box, Button, LinearProgress, Modal, Typography, Stack, alpha } from '@mui/material';
-import React, { useRef, useState } from 'react';
+import {
+  Alert,
+  Box,
+  Button,
+  LinearProgress,
+  Modal,
+  Typography,
+  Stack,
+  alpha,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select
+} from '@mui/material';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   deleteObject,
   getDownloadURL,
@@ -7,10 +20,10 @@ import {
   ref,
   uploadBytesResumable
 } from 'firebase/storage';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { startGetDocumentsSuccess } from '../../actions/userActions';
-import { postEditDocument } from '../../services/documentsService';
+import { upsertUserDocumentFile } from '../../services/documentsService';
 import { SuccessAlert } from '../Common';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUpload, faFilePdf } from '@fortawesome/free-solid-svg-icons';
@@ -20,84 +33,118 @@ const storage = getStorage();
 const EditDocumentModal = ({ open, setOpen, documentType }) => {
   const dispatch = useDispatch();
   const { idUsuario } = useParams();
+  const { selectedUser } = useSelector((state) => state.documents);
 
   const inputRef = useRef(null);
 
+  const maxFiles = documentType?.maxFiles || 1;
+
+  const existingFiles = useMemo(() => documentType?.files || [], [documentType]);
+  const slotOptions = useMemo(() => Array.from({ length: maxFiles }, (_, i) => i + 1), [maxFiles]);
+
+  const [slot, setSlot] = useState(1);
   const [file, setFile] = useState(null);
   const [progressPercent, setProgressPercent] = useState(0);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
-  const handleClose = () => {
+  useEffect(() => {
+    if (!open) return;
+    setSlot(1);
     setFile(null);
     setProgressPercent(0);
-    setErrorMsg('');
     setLoading(false);
+    setErrorMsg('');
+    if (inputRef.current) inputRef.current.value = '';
+  }, [open, documentType?.id]);
+
+  const handleClose = () => {
+    if (loading) return;
     setOpen(false);
   };
 
+  const currentExisting = useMemo(() => {
+    return existingFiles[slot - 1] || null;
+  }, [existingFiles, slot]);
+
   const validateSelectedFile = () => {
-    const MAX_FILE_SIZE = 20480; // KB (20MB)
+    const MAX_FILE_SIZE = 20480;
 
-    if (!file) {
-      setErrorMsg('Por favor selecciona un archivo');
-      return;
-    }
-
-    if (file.size / 1024 > MAX_FILE_SIZE) {
-      setErrorMsg('El archivo excede el límite de 20MB');
-      return;
-    }
+    if (!file) return setErrorMsg('Por favor selecciona un archivo');
+    if (file.type !== 'application/pdf') return setErrorMsg('El archivo debe ser PDF');
+    if (file.size / 1024 > MAX_FILE_SIZE) return setErrorMsg('El archivo excede el límite de 20MB');
 
     setErrorMsg('');
-    handleSubmitDocument();
+    handleSubmit();
   };
 
-  const handleSubmitDocument = () => {
-    setLoading(true);
+  const uploadSingleFile = (fileToUpload) => {
+    return new Promise((resolve, reject) => {
+      const path = `users/${selectedUser.id}/documentTypes/${documentType.id}/${Date.now()}_${
+        fileToUpload.name
+      }`;
+      const documentRef = ref(storage, path);
+      const uploadTask = uploadBytesResumable(documentRef, fileToUpload);
 
-    const documentRef = ref(storage, `${Date.now()}_${file.name}`);
-    const uploadTask = uploadBytesResumable(documentRef, file);
-
-    uploadTask.on(
-      'state_changed',
-      (snapshot) => {
-        const progress = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
-        setProgressPercent(progress);
-      },
-      () => {
-        setErrorMsg('Error al subir el archivo');
-        setLoading(false);
-      },
-      async () => {
-        try {
+      uploadTask.on(
+        'state_changed',
+        (snapshot) => {
+          const progress = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
+          setProgressPercent(progress);
+        },
+        (err) => reject(err),
+        async () => {
           const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+          resolve(downloadURL);
+        }
+      );
+    });
+  };
 
-          if (documentType?.document) {
-            const oldRef = ref(storage, documentType.document);
-            await deleteObject(oldRef);
-          }
+  const handleSubmit = async () => {
+    try {
+      setLoading(true);
+      setProgressPercent(0);
 
-          await postEditDocument(documentType.id, downloadURL);
-          dispatch(startGetDocumentsSuccess(idUsuario));
+      const url = await uploadSingleFile(file);
 
-          SuccessAlert('Documento actualizado', 'El documento se actualizó correctamente');
+      const result = await upsertUserDocumentFile({
+        userId: selectedUser.id,
+        documentTypeId: documentType.id,
+        fileIndex: slot,
+        documentURL: url,
+        fileName: file.name
+      });
 
-          handleClose();
-        } catch (error) {
-          console.error(error);
-          setErrorMsg('No se pudo actualizar el documento');
-          setLoading(false);
+      if (result.prevUrl) {
+        try {
+          const oldRef = ref(storage, result.prevUrl);
+          await deleteObject(oldRef);
+        } catch (e) {
+          console.warn('No se pudo borrar el archivo anterior del storage:', e);
         }
       }
-    );
+
+      dispatch(startGetDocumentsSuccess(idUsuario));
+      SuccessAlert(
+        'Documento actualizado',
+        `Se actualizó el archivo ${slot}${maxFiles > 1 ? ` de ${maxFiles}` : ''}`
+      );
+      setOpen(false);
+    } catch (error) {
+      console.error(error);
+      setErrorMsg(error?.message || 'No se pudo actualizar el documento');
+      setLoading(false);
+    }
   };
+
+  if (!documentType) return null;
 
   return (
     <Modal open={open} onClose={handleClose}>
       <Box
         sx={{
-          width: { xs: '90%', sm: 480 },
+          width: { xs: '90%', sm: 520 },
           bgcolor: 'background.paper',
           borderRadius: 4,
           p: 4,
@@ -110,9 +157,36 @@ const EditDocumentModal = ({ open, setOpen, documentType }) => {
             ✏️ Actualizar documento
           </Typography>
 
+          <Typography variant="body2" color="text.secondary">
+            Tipo: <strong>{documentType.title}</strong> · Máx <strong>{maxFiles}</strong> archivo(s)
+          </Typography>
+
           {errorMsg && <Alert severity="error">{errorMsg}</Alert>}
 
-          {/* UPLOAD ZONE */}
+          {maxFiles > 1 && (
+            <FormControl fullWidth size="small">
+              <InputLabel id="slot-label">Archivo a actualizar</InputLabel>
+              <Select
+                labelId="slot-label"
+                label="Archivo a actualizar"
+                value={slot}
+                onChange={(e) => setSlot(Number(e.target.value))}
+                disabled={loading}>
+                {slotOptions.map((n) => (
+                  <MenuItem key={n} value={n}>
+                    Archivo {n} {existingFiles[n - 1]?.url ? '• (ya existe)' : '• (vacío)'}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          )}
+
+          {currentExisting?.url && (
+            <Alert severity="info">
+              Actualmente: <strong>{currentExisting.name || `Archivo ${slot}`}</strong>
+            </Alert>
+          )}
+
           {!loading ? (
             <>
               <input
@@ -120,7 +194,7 @@ const EditDocumentModal = ({ open, setOpen, documentType }) => {
                 type="file"
                 hidden
                 accept="application/pdf"
-                onChange={(e) => setFile(e.target.files[0])}
+                onChange={(e) => setFile(e.target.files?.[0] || null)}
               />
 
               <Box
@@ -132,13 +206,11 @@ const EditDocumentModal = ({ open, setOpen, documentType }) => {
                   textAlign: 'center',
                   cursor: 'pointer',
                   transition: 'all .3s ease',
-                  '&:hover': {
-                    backgroundColor: alpha('#001E3C', 0.04)
-                  }
+                  '&:hover': { backgroundColor: alpha('#001E3C', 0.04) }
                 }}>
                 <FontAwesomeIcon icon={faUpload} size="2x" style={{ color: '#001E3C' }} />
                 <Typography mt={1} fontWeight={600}>
-                  Seleccionar nuevo archivo
+                  Seleccionar nuevo archivo (PDF)
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
                   {file ? (
@@ -153,7 +225,7 @@ const EditDocumentModal = ({ open, setOpen, documentType }) => {
             </>
           ) : (
             <Stack spacing={2}>
-              <Typography>Actualizando documento… por favor espera</Typography>
+              <Typography>Actualizando… por favor espera</Typography>
               <Typography variant="h4" textAlign="center">
                 {progressPercent}%
               </Typography>

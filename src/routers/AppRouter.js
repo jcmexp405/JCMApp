@@ -15,6 +15,7 @@ import {
 } from '../pages';
 import RequestAccountScreen from '../pages/RequestAccountScreen.component';
 import SuccessMessageScreen from '../pages/SuccessMessageScreen.component';
+import SettingsScreen from '../pages/SettingsScreen.component';
 
 const AppRouter = () => {
   return (
@@ -31,6 +32,7 @@ const AppRouter = () => {
         <Route path="/documentos/:idCategory" element={<DocumentsListScreen />} />
         <Route path="/documentos/preview" element={<PDFView />} />
         <Route path="/usuarios" element={<UsersScreen />} />
+        <Route path="/settings" element={<SettingsScreen />} />
         <Route path="/:idUsuario" element={<UserDetailsScreen />} />
         <Route path="/alertas" element={<AlertsScreen />} />
         <Route path="/tareas" element={<TasksScreen />} />

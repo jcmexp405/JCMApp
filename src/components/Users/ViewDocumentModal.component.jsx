@@ -1,11 +1,26 @@
-import { Modal, Typography, Box, Stack, Divider, IconButton } from '@mui/material';
+import { Modal, Typography, Box, Stack, Divider, IconButton, Tabs, Tab, Chip } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import moment from 'moment';
+import { useMemo, useState } from 'react';
 
 const ViewDocumentModal = ({ open, setOpen, documentData }) => {
-  const handleClose = () => {
-    setOpen(false);
-  };
+  const handleClose = () => setOpen(false);
+
+  const files = useMemo(() => {
+    if (!documentData) return [];
+    if (Array.isArray(documentData.files) && documentData.files.length) {
+      return documentData.files;
+    }
+
+    if (documentData.document) {
+      return [{ url: documentData.document, name: documentData.title }];
+    }
+
+    return [];
+  }, [documentData]);
+
+  const [activeIndex, setActiveIndex] = useState(0);
+  const activeFile = files[activeIndex];
 
   if (!documentData) return null;
 
@@ -24,16 +39,24 @@ const ViewDocumentModal = ({ open, setOpen, documentData }) => {
           flexDirection: 'column',
           boxShadow: '0 24px 80px rgba(0,0,0,0.25)'
         }}>
-        {/* HEADER */}
         <Stack direction="row" alignItems="center" justifyContent="space-between">
           <Box>
             <Typography variant="h6" fontWeight={700}>
               📄 {documentData.title}
             </Typography>
+
             <Typography variant="body2" color="text.secondary">
               Última modificación:{' '}
               {moment(documentData?.lastUpdate?.seconds * 1000).format('DD MMMM YYYY')}
             </Typography>
+
+            {files.length > 1 && (
+              <Chip
+                label={`Archivo ${activeIndex + 1} de ${files.length}`}
+                size="small"
+                sx={{ mt: 1 }}
+              />
+            )}
           </Box>
 
           <IconButton onClick={handleClose}>
@@ -43,7 +66,25 @@ const ViewDocumentModal = ({ open, setOpen, documentData }) => {
 
         <Divider sx={{ my: 2 }} />
 
-        {/* PDF VIEWER */}
+        {files.length > 1 && (
+          <Box sx={{ mb: 2 }}>
+            <Tabs
+              value={activeIndex}
+              onChange={(_, v) => setActiveIndex(v)}
+              variant="scrollable"
+              scrollButtons="auto"
+              sx={{
+                '& .MuiTab-root': {
+                  textTransform: 'none',
+                  fontWeight: 600
+                }
+              }}>
+              {files.map((file, idx) => (
+                <Tab key={idx} label={file.name ? file.name : `Archivo ${idx + 1}`} />
+              ))}
+            </Tabs>
+          </Box>
+        )}
         <Box
           sx={{
             flex: 1,
@@ -53,7 +94,7 @@ const ViewDocumentModal = ({ open, setOpen, documentData }) => {
           }}>
           <iframe
             title="pdf-view"
-            src={documentData.document}
+            src={activeFile?.url}
             style={{
               width: '100%',
               height: '100%',

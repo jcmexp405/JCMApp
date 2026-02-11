@@ -115,6 +115,9 @@ function ResponsiveAppBar() {
                 <Link to={'/alertas'} style={{ color: 'white' }}>
                   Alertas
                 </Link>
+                <Link to={'/settings'} style={{ color: 'white' }}>
+                  Configuración
+                </Link>
               </MenuItem>
             </Menu>
           </Box>
@@ -124,6 +127,9 @@ function ResponsiveAppBar() {
             </Link>
             <Link to={'/alertas'} style={{ color: 'white', marginLeft: 20 }}>
               Alertas
+            </Link>
+            <Link to={'/settings'} style={{ color: 'white', marginLeft: 20 }}>
+              Configuración
             </Link>
           </Box>
           <Box sx={{ flexGrow: 0 }}>

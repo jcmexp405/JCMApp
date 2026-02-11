@@ -26,18 +26,13 @@ const DocumentsMenuScreen = () => {
     load();
   }, [dispatch]);
 
-  // ⛔ ESPERA A FIREBASE
   if (!authReady) return null;
 
-  // 🚫 NO AUTORIZADO
   if (!user || userRole?.type !== 'user') {
     return <Navigate to="/login" replace />;
   }
-
-  // ✅ UI NORMAL
   return (
     <>
-      {/* 🔹 HERO */}
       <Box
         sx={{
           background: 'linear-gradient(135deg, #00356a 0%, #001e3c 50%, #000d19 100%)',
@@ -70,7 +65,6 @@ const DocumentsMenuScreen = () => {
         </Fade>
       </Box>
 
-      {/* 🔹 CONTENT */}
       <Box
         sx={{
           backgroundColor: '#e5e8eb',

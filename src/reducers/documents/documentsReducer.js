@@ -12,10 +12,7 @@ export const documentsReducer = (state = initialState, action) => {
     case types.GET_DOCUMENTS:
       return {
         ...state,
-        document: {
-          url: action.payload.url,
-          category: action.payload.category
-        }
+        document: action.payload
       };
     case types.GET_DOCUMENT_SUCCESS:
       return {

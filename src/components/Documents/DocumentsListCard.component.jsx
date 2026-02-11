@@ -6,13 +6,14 @@ import { getDocuments } from '../../actions/documentsActions';
 import { useNavigate } from 'react-router-dom';
 
 const DocumentsListCard = ({ document }) => {
+  console.log('Document en card', document);
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const handleOpen = () => {
     if (!document.document) return;
 
-    dispatch(getDocuments({ url: document.document, category: document.title }));
+    dispatch(getDocuments(document));
     navigate('/documentos/preview');
   };
 

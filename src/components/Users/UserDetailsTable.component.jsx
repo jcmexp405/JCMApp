@@ -1,6 +1,11 @@
 import {
+  Box,
   Button,
   Chip,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
   Table,
   TableBody,
   TableCell,
@@ -8,12 +13,13 @@ import {
   TableHead,
   TableRow
 } from '@mui/material';
-import React, { Fragment, useState } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import { NewDocumentModal, userDetailsTableHeaders } from '.';
 import { useSelector } from 'react-redux';
 import EditDocumentModal from './EditDocumentModal.component';
 import ViewDocumentModal from './ViewDocumentModal.component';
 import moment from 'moment';
+import { getAllDocumentCategories } from '../../services/documentsService';
 
 const UserDetailsTable = () => {
   const { userDocuments } = useSelector((state) => state.documents);
@@ -21,20 +27,55 @@ const UserDetailsTable = () => {
   const [openEdit, setOpenEdit] = useState(false);
   const [openView, setOpenView] = useState(false);
   const [openNew, setOpenNew] = useState(false);
+  const [categoriesList, setCategoriesList] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState('all');
+
   const handleOpenEditModal = (document) => {
     setSelectedDoc(document);
     setOpenEdit(true);
   };
-  const handleOpenViewModal = (document) => {
-    setSelectedDoc(document);
+  const handleOpenViewModal = (docType) => {
+    setSelectedDoc(docType);
     setOpenView(true);
   };
+
   const handleOpenNewModal = (document) => {
     setSelectedDoc(document);
     setOpenNew(true);
   };
+  useEffect(() => {
+    const fetchCategories = async () => {
+      const docs = await getAllDocumentCategories();
+      setCategoriesList(docs);
+    };
+    fetchCategories();
+  }, []);
+  const handleFilterDocuments = (documents, category) => {
+    if (category === 'all') {
+      return documents;
+    }
+    return documents.filter((document) => document.category === category);
+  };
+  const filteredDocuments = handleFilterDocuments(userDocuments, selectedCategory);
   return (
     <Fragment>
+      <Box>
+        <FormControl fullWidth size="small">
+          <InputLabel id="category-label">Categoría</InputLabel>
+          <Select
+            labelId="category-label"
+            value={selectedCategory}
+            label="Categoría"
+            onChange={(e) => setSelectedCategory(e.target.value)}>
+            <MenuItem value="all">Todos los documentos</MenuItem>
+            {categoriesList.map((category) => (
+              <MenuItem key={category.id} value={category.id}>
+                {category.title}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      </Box>
       <TableContainer>
         <Table>
           <TableHead>
@@ -47,7 +88,7 @@ const UserDetailsTable = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {userDocuments.map((document) => (
+            {filteredDocuments.map((document) => (
               <TableRow key={document.id}>
                 <TableCell style={{ color: '#001E3C' }}>{document.title}</TableCell>
                 <TableCell style={{ color: '#001E3C' }}>
