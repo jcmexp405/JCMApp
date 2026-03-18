@@ -11,7 +11,10 @@ import {
   limit,
   serverTimestamp
 } from 'firebase/firestore/lite';
+import { getStorage, ref, deleteObject } from 'firebase/storage';
 import app from '../firebaseElements/firebase';
+
+const storage = getStorage();
 
 const db = getFirestore(app);
 export const getAllDocumentCategories = async () => {
@@ -198,19 +201,24 @@ export const postNewDocumentType = async (payload) => {
   return docRef;
 };
 export const deleteDocumentType = async (documentTypeId) => {
-  const q = query(
-    collection(db, 'documents'),
-    where('documentType', '==', documentTypeId),
-    limit(1) // con 1 basta para bloquear
-  );
-
+  const q = query(collection(db, 'documents'), where('documentType', '==', documentTypeId));
   const snap = await getDocs(q);
 
-  if (!snap.empty) {
-    throw new Error(
-      'No se puede eliminar este tipo de documento porque existen documentos registrados con este tipo.'
-    );
-  }
+  await Promise.all(
+    snap.docs.map(async (docSnap) => {
+      const { document: fileUrl } = docSnap.data();
+
+      if (fileUrl) {
+        try {
+          await deleteObject(ref(storage, fileUrl));
+        } catch (e) {
+          console.warn('No se pudo borrar el archivo del storage:', e);
+        }
+      }
+
+      await deleteDoc(doc(db, 'documents', docSnap.id));
+    })
+  );
 
   await deleteDoc(doc(db, 'documentType', documentTypeId));
   return { success: true };
